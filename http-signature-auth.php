@@ -26,13 +26,13 @@ class HTTPSignature {
 
 	static function parse(array $headers, array $options = array())
 	{
-		if (!array_key_exists('authorization', $headers)) {
-			throw new MissingHeaderError('no authorization header in the request');
+		if (!array_key_exists('Authorization', $headers)) {
+			throw new MissingHeaderError('no Authorization header in the request');
 		}
-		$auth = $headers['authorization'];
+		$auth = $headers['Authorization'];
 
 		if (!array_key_exists('headers', $options)) {
-			$options['headers'] = array(isset($headers['x-date']) ? 'x-date' : 'date');
+			$options['headers'] = array(isset($headers['x-date']) ? 'x-date' : 'Date');
 		} else {
 			if (!is_array($options['headers'])) {
 				throw new Exception('headers option is not an array');
@@ -180,7 +180,7 @@ class HTTPSignature {
 		if (array_key_exists('headers', $params)) {
 			$params['headers'] = explode(' ', $params['headers']);
 		} else {
-			$params['headers'] = array(isset($headers['x-date']) ? 'x-date' : 'date');
+			$params['headers'] = array(isset($headers['x-date']) ? 'x-date' : 'Date');
 		}
 
 		foreach ($options['headers'] as $header) {
@@ -194,14 +194,14 @@ class HTTPSignature {
 		}
 
 		$date = null;
-		if (isset($headers['date'])) {
-			$date = strtotime($headers['date']);
+		if (isset($headers['Date'])) {
+			$date = strtotime($headers['Date']);
 		} elseif (isset($headers['x-date'])) {
 			$date = strtotime($headers['x-date']);
 		}
 		if (!is_null($date)) {
 			if ($date === FALSE) {
-				throw new InvalidHeaderError('unable to parse date header');
+				throw new InvalidHeaderError('unable to parse Date header');
 			}
 			$skew = abs(time() - $date);
 			if ($skew > $options['clockSkew']) {
@@ -282,7 +282,7 @@ class HTTPSignature {
 		}
 
 		if (!array_key_exists('headers', $options)) {
-			$options['headers'] = array('date');
+			$options['headers'] = array('Date');
 		} else {
 			if (!is_array($options['headers'])) {
 				throw new Exception('headers option is not an array');
@@ -296,8 +296,8 @@ class HTTPSignature {
 			$options['algorithm'] = 'rsa-sha256';
 		}
 
-		if (!array_key_exists('date', $headers)) {
-			$headers['date'] = date(DATE_RFC1123);
+		if (!array_key_exists('Date', $headers)) {
+			$headers['Date'] = date(DATE_RFC1123);
 		}
 
 		$headers['request-line'] = array_key_exists('requestLine', $options) ?
@@ -341,7 +341,7 @@ class HTTPSignature {
 			throw new InvalidAlgorithmError("unsupported algorithm");
 		}
 		unset($headers['request-line']);
-		$headers['authorization'] = sprintf('Signature keyId="%s",algorithm="%s",headers="%s",signature="%s"',
+		$headers['Authorization'] = sprintf('Signature keyId="%s",algorithm="%s",headers="%s",signature="%s"',
 		    $options['keyId'], $options['algorithm'], implode(' ', $options['headers']),
 		    base64_encode($signature));
 	}
